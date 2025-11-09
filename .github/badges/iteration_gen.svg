@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 144 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g id="iter" transform="matrix(0.375,0,0,0.25,0,0)">
+        <rect x="0" y="0" width="384" height="128" style="fill:none;"/>
+        <clipPath id="_clip1">
+            <rect x="0" y="0" width="384" height="128"/>
+        </clipPath>
+        <g clip-path="url(#_clip1)">
+            <g transform="matrix(0.666667,0,0,0.967818,0,4.11934)">
+                <path d="M576,28.808C576,10.559 561.661,-4.256 544,-4.256L32,-4.256C14.339,-4.256 0,10.559 0,28.808L0,94.936C0,113.184 14.339,128 32,128L544,128C561.661,128 576,113.184 576,94.936L576,28.808Z" style="fill:none;"/>
+                <clipPath id="_clip2">
+                    <path d="M576,28.808C576,10.559 561.661,-4.256 544,-4.256L32,-4.256C14.339,-4.256 0,10.559 0,28.808L0,94.936C0,113.184 14.339,128 32,128L544,128C561.661,128 576,113.184 576,94.936L576,28.808Z"/>
+                </clipPath>
+                <g clip-path="url(#_clip2)">
+                    <g transform="matrix(1.36063,0,0,1.18302,53.5186,-23.4262)">
+                        <rect x="54.74" y="16.204" width="329.26" height="111.796" style="fill:rgb(248,216,175);"/>
+                    </g>
+                    <g transform="matrix(0.388751,0,0,1.18302,-21.2804,-23.4262)">
+                        <rect x="54.74" y="16.204" width="329.26" height="111.796" style="fill:rgb(87,46,22);"/>
+                    </g>
+                    <g transform="matrix(1,0,0,1.03325,0,-4.25632)">
+                        <path d="M11.441,64L110.909,64" style="fill:none;stroke:rgb(255,245,231);stroke-width:13.2px;"/>
+                    </g>
+                    <g transform="matrix(1,0,0,1.03325,-2.82524,-4.25632)">
+                        <circle cx="64" cy="64" r="14.079" style="fill:rgb(87,46,22);stroke:rgb(255,245,231);stroke-width:13.2px;"/>
+                    </g>
+                    <g transform="matrix(0.496803,0,0,0.513323,5.75694,29.0192)">
+                        <circle cx="11.441" cy="64" r="2.128" style="fill:none;stroke:rgb(255,245,231);stroke-width:26.57px;"/>
+                    </g>
+                    <g transform="matrix(0.496803,0,0,0.513323,105.225,29.0192)">
+                        <circle cx="11.441" cy="64" r="2.128" style="fill:none;stroke:rgb(255,245,231);stroke-width:26.57px;"/>
+                    </g>
+                    <g transform="matrix(1,0,0,1.03325,82.905,-4.25632)">
+                        <circle cx="11.441" cy="64" r="2.128" style="fill:none;stroke:rgb(255,245,231);stroke-width:13.2px;"/>
+                    </g>
+                    <g transform="matrix(1,0,0,1.03325,16.563,-4.25632)">
+                        <circle cx="11.441" cy="64" r="2.128" style="fill:none;stroke:rgb(255,245,231);stroke-width:13.2px;"/>
+                    </g>
+                </g>
+            </g>
+            <g transform="matrix(0.666667,0,0,1,-2.62713,62.2027)">
+                <text x="142.499px" y="43.432px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:38.495px;fill:rgb(98,71,56);">Last Completed Iteration</text>
+            </g>
+            <g transform="matrix(1.27201,0,0,1.90801,-88.2274,-19.9263)">
+                <text x="142.499px" y="43.432px" style="font-family:'Arial-BoldMT', 'Arial', sans-serif;font-weight:700;font-size:38.495px;">2A</text>
+            </g>
+        </g>
+    </g>
+</svg>

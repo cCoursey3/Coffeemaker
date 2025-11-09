@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.js"></script>
+    
+    <style>
+	
+	ul {
+    list-style-type: none; /* Removes bullets */
+    padding-left: 0; /* Removes padding, optional */
+}
+
+	li {
+    padding: 5px
+}
+
+    body {
+  	background-color: #f8d8af;
+	}
+	.loggedin{
+		font-size: 16px;
+		position: fixed;
+		top: 500px;
+		transform: translate(-50%, 0); /* Horizontally centers the element */
+		left: 50%;  /* Defines a starting point at 50% from the left */
+		font-weight: bold;
+		font-family: 'Source Code Pro', monospace;
+		color: #7b7b7d;
+	
+	}
+		#logout-btn {
+		position: relative;
+		left: 900px;
+		border: none;
+		background-color: #f8d8af;
+	}
+	
+
+	.options {
+    background-color: #572e16;
+    color: white;
+    transform: translate(-50%, 0); /* Horizontally centers the element */
+    left: 50%;  /* Defines a starting point at 50% from the left */
+    border-radius: 8px;
+    font-size: 23px;
+    height: 40px;
+    width: 250px;
+    font-weight: bold;
+    position: relative;
+    top: 170px;
+    display: inline-block; /* Allows width and height to take effect */
+    text-align: center; /* Center text inside the link */
+    line-height: 40px; /* Vertically center text inside the link */
+    text-decoration: none; /* Optional: Removes underline from links */
+}
+
+
+	
+	h1 {
+ 		text-align: center;
+ 		font-family: 'Source Code Pro', monospace;
+ 		font-size: 70px;
+        position: fixed;
+        top: 30px;
+        transform: translate(-50%, 0); /* Horizontally centers the element */
+		left: 50%;  /* Defines a starting point at 50% from the left */
+	}
+	
+	#logged-in {
+		font-family: 'Source Code Pro', monospace;
+		position: fixed;
+		bottom: 12px;
+		left: 12px;
+	}
+    </style>
+
+    <h1> CoffeeMaker </h1>
+    
+
+
+</head>
+<body>
+  <script	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.js"></script>
+	<script>
+    /*<![CDATA[*/ 
+
+    var app = angular.module('addIngredient', []);
+    app.controller('populateCtrl', function($scope, $http, $q) {
+    	var csrfToken = ''; // Initialize CSRF token variable
+    	var cookies = document.cookie.split(';');
+    	for (var i = 0; i < cookies.length; i++) {
+    	    var cookie = cookies[i].split('=');
+    	    if (cookie[0].trim() === 'XSRF-TOKEN') {
+    	        csrfToken = decodeURIComponent(cookie[1]);
+    	    }
+    	}
+    	$scope.logout = () => {
+    		$http({
+    			method: 'POST', 
+    			url: '/logout',
+    			headers: {
+    				'X-XSRF-TOKEN': csrfToken
+    			}
+    			
+    		}).then(function(response) {
+    			alert('successfully logged out');
+    			window.location.href = '/home';
+    			
+    		}).catch(function(error) {
+    			console.error('Logout failed: ', error);
+    			alert('Logout failed');
+    			});
+    		};
+    	
+      console.log("Testing")
+      
+      $http.get("/api/v1/users/self").then(function(response) {
+			$scope.user = response.data;
+			$scope.permissions = $scope.user.role;
+			$scope.addIngredients = $scope.permissions.addIngredients;
+			$scope.addIngredientType = $scope.permissions.addIngredientType;
+			$scope.addStaffAccount = $scope.permissions.addStaffAccount;
+			$scope.makeCoffee = $scope.permissions.makeCoffee;
+			
+		});
+    	    
+      
+
+    });
+
+    /*]]>*/
+  </script>
+	<div ng-app="addIngredient" ng-controller="populateCtrl">
+	<button id="logout-btn" ng-click="logout()">Logout</button>
+	
+	<form>
+	
+		<ul list-style-type: none;>
+		<li ng-show="addIngredientType">
+			<a class = "options" href="inventory.html">Update Inventory</a>	
+		</li>
+	
+		<li ng-show="addIngredients">	
+			<a class = "options" href="addrecipe.html">Add a Recipe</a>
+		</li>
+		<li ng-show="addIngredients">
+			<a class = "options" href="editrecipe.html">Edit Recipe</a>
+		</li>
+		<li ng-show="addIngredients">
+			<a class = "options" href="deleterecipe.html">Delete Recipe</a>
+		</li>
+		<li ng-show="addIngredients">	
+			<a class = "options" href="fulfillOrders.html">Fulfill Orders</a>
+		</li>
+		<li ng-show="makeCoffee">
+			<a class = "options" href="makecoffee.html">Make Coffee</a>
+		</li>
+		<li ng-show="makeCoffee">
+			<a class = "options" href="viewOrders.html">Your Orders</a>
+		</li>
+		<li ng-show="addIngredients">
+			<a class = "options" href="addingredient.html">Add Ingredient</a>
+		</li>
+		
+		<li ng-show="addStaffAccount">
+			<a class = "options" href="createStaff.html">Add Staff</a>	
+		</li>
+		
+		
+
+	</ul>
+	
+
+
+	
+	   
+	</form>
+	
+	<div id="logged-in">Logged in as {{user.username}}</div>
+	
+	
+	
+	</div>
+</body>
+</html>

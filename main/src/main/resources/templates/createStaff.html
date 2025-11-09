@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="createStaff">
+<head>
+	
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+    body {
+  		background-color: #f8d8af;
+	}
+	h1 {
+ 		font-family: 'Source Code Pro', monospace;
+ 		font-size: 70px;
+        margin-top: 5px;
+        text-align: center;
+	}
+	.flex-container{
+	 	display: flex;
+    	flex-direction: column;
+    	align-items: center;
+    	text-align: center;
+    	min-height: 100vh; /* Make sure it takes at least full viewport height */
+	}
+	
+	
+	
+	.input-container {
+    	width: 100%;
+    	position: relative;
+    	display: flex;
+    	flex-direction: row;
+    }
+    
+
+	.flex2{
+		display: flex;
+		position: relative;
+		top: -80px;
+		align-items: flex-end;
+		align-content: flex-end;
+		justify-content: flex-end;
+		right: -150px;
+	
+	}
+	.subheading{
+		font-family: 'Source Code Pro', monospace;
+		font-weight: bold;
+		font-size: 35px;		
+	}
+	
+	input[type=text], input[type=password] {
+  		width: 100%;
+  		padding: 12px 20px;
+  		margin: 8px 0;
+  		box-sizing: border-box;
+  		border-radius: 4px;
+		font-size: 20px;
+		
+	}
+	
+	#dropdown {
+		width: 20%;
+		height: 30px;
+		text-align: center;
+		position: relative;
+		top: -40px;
+	}
+	
+	#create {
+		background-color: #572e16;
+    	color: white;
+		border-radius: 8px;
+		font-size: 23px;
+		height: 40px;
+		width: 250px;
+		font-weight: bold;
+	
+
+    }
+	.password-toggle-icon {
+		position: relative;
+		top: 20px;
+		left: 10px;
+	}
+    
+    </style>
+
+
+	
+    
+
+
+</head>
+
+<body>
+	<script	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.js"></script>
+	<script>
+    /*<![CDATA[*/ 
+
+		var app = angular.module('createStaff', []);
+		app.controller('populateCtrl', function($scope, $http, $q) {
+		$scope.home = () => document.location.href = "/"
+
+		
+
+		$scope.newUser = {
+			username: '',
+			password: '',
+			role: {'roleName': 'Staff'}
+		};
+		
+			
+		$scope.reset = function() {
+			$scope.newUser = {
+				username : '',
+				password : '',
+				role: {'roleName': 'Staff'}
+			};
+		}
+
+		// Get roles doesnt exist because there is no api for it
+		$http.get("/api/v1/roles")
+					.then(res => {
+						$scope.roles = res.data;
+					});
+
+		$scope.createStaff = function() {    	  
+			$scope.success = false;
+			$scope.failure = false;
+
+			$scope.newUser.role = {'roleName': 'Staff'}
+
+			$http.post("/api/v1/users", $scope.newUser)
+			.then(function(response) {
+				$scope.message = "Success"
+			})
+			.catch(function(error) {
+				$scope.message = error.data.message;
+			});
+			
+			$scope.reset();
+		};
+
+
+		});
+
+    /*]]>*/
+  </script>
+
+	<div ng-app="createStaff" ng-controller="populateCtrl">
+	  <button id="home-btn" ng-click="home()">Go Home</button>
+   <h1> CoffeeMaker </h1>
+  <div class="flex-container">
+	<div class ="subheading">
+		Create Staff Account
+		
+	</div>
+		<form>
+			<div class="username">
+				<input type="text" ng-model="newUser.username" size="50" placeholder="Username">
+			</div>
+			<div class = "input-container">
+	    		<input id = "password" name="password" ng-model="newUser.password" type="password" size="50" placeholder="Password">
+	    		<span class="password-toggle-icon"><i class="fas fa-eye"></i></span>
+        	</div>
+        
+			<div class="flex2">
+			<select id="dropdown">
+				<!-- Hard coded id for the role -->
+				<option value="Staff" ng-model="newUser.role">Staff</option>
+			</select></div>
+			<button id="create" ><div ng-click="createStaff()">Create Account</button>
+		</form>	
+			{{ message }}
+		
+		</div>
+		
+	</div>
+
+	
+			
+</body>
+</html>

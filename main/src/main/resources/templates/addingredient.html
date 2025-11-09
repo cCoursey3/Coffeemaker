@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>Add Ingredient</title>
+</head>
+<body>
+  <script	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.js"></script>
+  <style>
+  	body {
+  		background-color: #f8d8af;
+	}
+	.flex-container {
+	 	display: flex;
+    	flex-direction: column;
+    	align-items: center;
+    	text-align: center;
+    	min-height: 100vh; /* Make sure it takes at least full viewport height */
+
+	}
+	h1 {
+ 		font-family: 'Source Code Pro', monospace;
+ 		font-size: 55px;
+        margin-top: 0;
+        text-align: center;
+	}
+	.input-group {
+		display: flex;
+		flex-direction: row;
+		font-size: 30px;
+		position: relative;
+		text-align: center;
+		font-family: 'Source Code Pro', monospace;
+		left: -40px;
+	}
+	input[type=number] {
+		position: relative;
+		left: 30px;
+		width: 280px;
+	}
+	.name{
+		position: relative;
+
+		font-family: 'Source Code Pro', monospace;
+	}
+	
+	#rname {
+		position: relative;
+		width: 280px;
+		left: 30px;
+
+	}
+	
+	#submit {
+		background-color: #572e16;
+    	color: white;
+		border-radius: 6px;
+		font-size: 18px;
+		height: 30px;
+		width: 175px;
+		font-weight: bold;
+		position: relative;
+		left: 40px;
+		top: 3px;
+	}
+	
+	#reset {
+		position: relative;
+		top: 30px;
+	}
+	
+		#logout-btn {
+		position: relative;
+		left: 900px;
+		border: none;
+		background-color: #f8d8af;
+	}
+		#message-container {
+       border: solid;
+       position: fixed;
+       top: 50px;
+       width: 40%;
+       height: 20%;
+       background-color: white;
+       border-radius: 10px;
+	   font-size: 20px;
+	   font-weight: normal;
+	   align-content: center;
+	   text-align: center;
+	   transform: translate(-50%, 0); 
+	   left: 50%;  
+    }
+    
+    #message-container button {
+    	width: 100%;
+    	border-radius: 5px;
+    	background-color: white;
+    	color: black;
+    	font-weight: normal;
+    	position: absolute;
+    	bottom: 0;
+    	right: 0;
+    	font-family: 'Source Code Pro', monospace;
+    	font-size: 16px;
+    }
+    
+    .message {
+    	font-family: 'Source Code Pro', monospace;
+    	font-size: 32px;
+    	font-weight: bold;
+    	position: relative;
+    }
+	
+	
+	
+  </style>
+	<script>
+    /*<![CDATA[*/ 
+
+    var app = angular.module('addIngredient', []);
+    app.controller('populateCtrl', function($scope, $http, $q) {
+    	$scope.isVisible = false;
+    	var csrfToken = ''; // Initialize CSRF token variable
+    	var cookies = document.cookie.split(';');
+    	for (var i = 0; i < cookies.length; i++) {
+    	    var cookie = cookies[i].split('=');
+    	    if (cookie[0].trim() === 'XSRF-TOKEN') {
+    	        csrfToken = decodeURIComponent(cookie[1]);
+    	    }
+    	}
+    	$scope.logout = () => {
+    		$http({
+    			method: 'POST', 
+    			url: '/logout',
+    			headers: {
+    				'X-XSRF-TOKEN': csrfToken
+    			}
+    			
+    		}).then(function(response) {
+    			alert('successfully logged out');
+    			window.location.href = '/home';
+    			
+    		}).catch(function(error) {
+    			console.error('Logout failed: ', error);
+    			alert('Logout failed');
+    			});
+    		};
+    		
+      $scope.reset = function() {
+        $scope.ingredient = {
+          name : '',
+		  amount : ''
+        };
+      }
+      $scope.reset2 = function() {
+      	$scope.isVisible = false;
+       }
+      $scope.addIngredient = function() {    	  
+      	$scope.success = false;
+		$scope.failure = false;
+
+		$http.post("/api/v1/ingredients", $scope.ingredient)
+		.then(function(response) {
+            $scope.message = "Success"
+        })
+        .catch(function(error) {
+        	$scope.message = error.data.message;
+        });
+    	$scope.isVisible = true;
+		$scope.reset();
+      };
+
+
+    });
+
+    /*]]>*/
+  </script>
+  <div ng-app="addIngredient" ng-controller="populateCtrl">
+     <a href="/index"><button id="home">Home</button></a>
+      <button id="logout-btn" ng-click="logout()">Logout</button>
+      <h1>Add Ingredient</h1>
+      <div class= "flex-container" id="content-container">
+      <form id="name-amount-form">
+        <div class="input-group" id="name-group"> 
+          <div class = "name"><label for="rname">Name</label><br></div>
+          <input type="text" id="rname" ng-model="ingredient.name" required="true" placeholder='Try "Coffee" or "Tea"'><br>
+        	<button id="submit" ng-click=addIngredient()>Add Ingredient</button>      
+        </div>
+        <br><br><br>
+        <div class="input-group" id="amount-group">
+          <label for="ingredient.amount">Initial Amount</label><br>
+          <input type="number" id="amount" ng-model="ingredient.amount" required="true" placeholder="Enter 1 or More">  
+        </div>
+      </form>
+      <div id="button-container">
+        <div id="button-group">
+          
+          <!-- Reset Button, clears fields -->
+        <button id="reset" ng-click="reset()">Reset Form</button>
+        </div>
+      </div>
+        <div id = "message-container" ng-show="isVisible">
+	    		<div class = "message">{{message}}</div>
+	    		<button class="yes" ng-click="reset2()">okay</button>
+	  	</div>
+    </div>
+  </div>
+</body>
+</html>

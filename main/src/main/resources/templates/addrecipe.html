@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Recipe</title>
+</head>
+<body>
+  <script	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.js"></script>
+  <style>
+  	body {
+  		background-color: #f8d8af;
+	}
+	.flex-container{
+	 	display: flex;
+    	flex-direction: column;
+    	align-items: center;
+    	text-align: center;
+    	min-height: 100vh; /* Make sure it takes at least full viewport height */
+	}
+	h1 {
+ 		font-family: 'Source Code Pro', monospace;
+ 		font-size: 55px;
+ 		position: relative;
+        text-align: center;
+	}
+		#logout-btn {
+		position: relative;
+		left: 900px;
+		border: none;
+		background-color: #f8d8af;
+	}
+	
+
+	
+	.recipeform {
+		display: flex;
+		flex-direction: row;
+		font-size: 25px;
+		font-family: 'Source Code Pro', monospace;
+	}
+	
+	.input-group {
+		display: flex;
+		flex-direction: column;
+		position: relative;
+	}
+	
+	
+	input[type=text] {
+		position: relative;
+		left: -50px;
+		width: 280px;
+		font-size: 16px;
+		font-family: 'Source Code Pro', monospace;
+	}
+	
+	.name {
+		position: relative;
+		font-family: 'Source Code Pro', monospace;
+		left: -155px;
+	}
+	
+	
+	#price {
+		left: 60px;
+		position: relative;
+		width: 280px;
+		font-size: 16px;
+		font-family: 'Source Code Pro', monospace;
+		
+	}
+	.price {
+		position: relative;
+		left:-48px;
+	}
+	
+	h2 {
+		display: inline-flex;  
+		position: relative;
+		background-color: #f8d8af;
+		z-index: 1; 
+    	box-sizing: border-box;
+    	font-size: 25px;
+		font-weight: bold;
+		padding: 10px;
+		font-family: 'Source Code Pro', monospace;
+		font-size: 35px;
+		justify-content: center;
+		text-align: center;
+    	top: -20px;
+
+	}
+	
+	.ingredients-container {
+		display: flex;
+		border: 2px solid;
+		min-height: 50vh;
+		flex-direction: row;
+		overflow-y: scroll;
+		width: 75%;
+		position: relative;
+		top: -80px;
+		padding: 60px 30px;
+	}
+	
+	
+	.grid-container {
+		display: grid;
+		position: relative;
+		align-content: start;
+		gap: 15px 10px;
+		justify-content: start;
+		grid-template-columns: auto auto auto;
+	}
+	
+	
+	.grid-item{
+		border: 2px solid #6F4E37;
+		border-radius: 5px;
+		width: 65%;
+		height: 40px;
+		background-color: #D2B48C;
+		display: flex;
+		justify-content: center;
+		text-align: center;
+		align-items: center;
+		box-shadow: 3px 3px;
+		z-index: 1; 
+	}
+	
+	#itemCount {
+		width: 30%;
+		position: relative;
+		left: 3px;
+	}
+	
+	#submit {
+		background-color: #572e16;
+    	color: white;
+		border-radius: 6px;
+		font-size: 18px;
+		height: 30px;
+		width: 175px;
+		font-weight: bold;
+		left: 280px;
+	}
+
+	#button-container {
+		position: relative;
+		top: -50px;
+	}
+	#message-container {
+       display: none;
+       border: solid;
+       position: fixed;
+       top: 50px;
+       width: 40%;
+       height: 20%;
+       background-color: white;
+       border-radius: 10px;
+	   font-size: 20px;
+	   font-weight: normal;
+	   align-content: center;
+	   text-align: center;
+	   transform: translate(-50%, 0); 
+	   left: 50%;  
+	   z-index: 1;
+    }
+    
+    #message-container button {
+    	width: 100%;
+    	border-radius: 5px;
+    	background-color: white;
+    	color: black;
+    	font-weight: normal;
+    	position: absolute;
+    	bottom: 0;
+    	right: 0;
+    	font-family: 'Source Code Pro', monospace;
+    	font-size: 16px;
+    }
+    
+    .message {
+    	font-family: 'Source Code Pro', monospace;
+    	font-size: 32px;
+    	font-weight: bold;
+    	position: relative;
+    }
+
+	
+	
+  </style>
+  <script>
+    /*<![CDATA[*/
+    var app = angular.module('addRecipe', []);
+    app.controller('populateCtrl', function($scope, $http, $q) {
+    	var csrfToken = ''; // Initialize CSRF token variable
+    	var cookies = document.cookie.split(';');
+    	for (var i = 0; i < cookies.length; i++) {
+    	    var cookie = cookies[i].split('=');
+    	    if (cookie[0].trim() === 'XSRF-TOKEN') {
+    	        csrfToken = decodeURIComponent(cookie[1]);
+    	    }
+    	}
+    	$scope.logout = () => {
+    		$http({
+    			method: 'POST', 
+    			url: '/logout',
+    			headers: {
+    				'X-XSRF-TOKEN': csrfToken
+    			}
+    			
+    		}).then(function(response) {
+    			alert('successfully logged out');
+    			window.location.href = '/home';
+    			
+    		}).catch(function(error) {
+    			console.error('Logout failed: ', error);
+    			alert('Logout failed');
+    			});
+    		};
+    		
+      $scope.grid = [];
+      $scope.ingredients = [];
+      $scope.ingredientAmounts = [];
+
+      $scope.recipe = {
+        name: '',
+        price: '',
+        ingredients: []
+      }
+      
+      
+      
+
+      $http.get("/api/v1/ingredients").then(function(response) {
+        response.data.forEach(function(item, index) {
+          $scope.ingredients[index] = {ingredient: item, count: ''};
+        });
+        console.log($scope.ingredients);
+        updateGrid();
+      });
+
+      $scope.reset = function() {
+        console.log("reset");
+        $scope.recipe.name = "";
+        $scope.recipe.price = "";
+        $scope.ingredients.forEach(function(item, index) {
+          item.count = '';
+        });
+      }
+      $scope.reset2 = function() {
+    	  $scope.isVisible = false;
+    	  document.getElementById("message-container").style.display = "none";
+      }
+      
+      $scope.addRecipe = function() {
+        $scope.recipe.ingredients = $scope.ingredients;
+        $http.post("/api/v1/recipes", $scope.recipe)
+        .then(function(response) {
+            $scope.message = "Success"
+            	document.getElementById("message-container").style.display = "block";
+        }).catch(function(error) {
+        	$scope.message = error.data.message;
+        	document.getElementById("message-container").style.display = "block";
+        });
+      }
+      /*
+    	GENERATIVE AI WAS USED GPT 3.5
+    	
+    	Prompt: How to fill 3 column grid with arbitrary number of grid items
+    	
+    	function originally generated with GPT 3.5 and then modified to
+    	correct errors
+      */
+      function updateGrid() {
+        var currentRow = [];
+        $scope.ingredients.forEach(function(item, index) {
+          currentRow.push(item);
+          if ((index + 1) % 2 === 0 || index === $scope.ingredients.length - 1) {
+              $scope.grid.push(currentRow);
+              currentRow = [];
+          }
+        });
+      }
+    });
+  </script>
+  <div ng-app="addRecipe" ng-controller="populateCtrl">
+ 
+   <a href="/index"><button id="home">Home</button></a>
+    <button id="logout-btn" ng-click="logout()">Logout</button>
+   <h1>Add a Recipe</h1>
+  
+    <div class="flex-container" id="content-container">
+      <form class="recipeform" id="name-price-form">
+        <div class="input-group" id="name-group">
+          <div class="name"><label for="rname">Name</label></div>
+          <input type="text" id="rname" ng-model="recipe.name" placeholder='Try "Latte" or "Mocha"'><br>
+        </div>
+        <div class="input-group" id="price-group">
+          <div class="price"><label for="price">Price</label></div>
+          <input type="number" ng-model="recipe.price" id="price" placeholder="Enter 1 or More">  
+        </div>
+      </form>
+      <h2 id="ingredient-header">Ingredients</h2>
+      <div class = "ingredients-container">
+      	<div class="grid-container">
+        	<div class="grid-row" ng-repeat="row in grid">
+          	<div class="grid-item" ng-repeat="item in row">
+            	{{item.ingredient.name}}
+            	<input id = "itemCount" type="number" ng-model="item.count"/>
+          	</div>
+        	</div>
+      	</div>
+      	</div>
+      <div id="button-container">
+          <button id="submit" ng-click="addRecipe()">Submit</button> <br> <br>
+          <button id="reset" ng-click="reset()">Reset Form</button>    
+      </div>
+              <div id = "message-container">
+	    		<div class = "message">{{message}}</div>
+	    		<button class="yes" ng-click="reset2()">okay</button>
+	  	</div>
+      
+    </div>  
+    
+  </div>
+  
+</body>
+</html>

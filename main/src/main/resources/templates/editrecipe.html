@@ -1,0 +1,289 @@
+<!-- HTML5 document template given by VSCode -->
+<!DOCTYPE html>
+<html lang="en">
+
+<style>
+  	body {
+  		background-color: #f8d8af;
+	}
+	h1 {
+ 		font-family: 'Source Code Pro', monospace;
+ 		font-size: 55px;
+        position: relative;
+        text-align: center;
+        
+	}
+	.flex-container {
+		display: flex;
+		position: relative;
+    	flex-direction: column;
+    	align-items: center;
+    	text-align: center;
+    	min-height: 100vh; /* Make sure it takes at least full viewport height */
+	}
+	
+	#recipe-selector {
+		width: 50%;
+		height: 30px;
+		font-size: 20px;
+	}
+	
+	#price {
+		position: relative;
+		top: 25px;
+	
+	}
+	#price h2 {
+    	display: inline;
+    	margin-right: 10px;
+    	font-family: 'Source Code Pro', monospace;
+    	
+	}
+
+	#price input {
+    	display: inline;
+    	font-size: 20px;
+    	width: 50%;
+	}
+	
+	.ingredient-container {
+		border: solid;
+		position: relative;
+		top: 50px;
+		width: 50%;
+		min-height: 300px; /* Starts at 300px but can grow */
+    	max-height: 600px; /* Maximum height before scrolling */
+    	overflow-y: auto; /* Adds a scrollbar if content exceeds max-height */
+		height: 300px;
+		box-sizing: border-box;
+		background-color: #EADDCA;
+		
+	
+	}
+			
+
+	#logout-btn {
+		position: relative;
+		left: 900px;
+		border: none;
+		background-color: #f8d8af;
+	}
+	
+	
+	#ingredients h2{
+		display: inline;
+    	margin-right: 10px;
+    	position: relative;
+    	font-family: 'Source Code Pro', monospace;
+    	left: 3px;
+    	top: 2px;    	
+	}
+	
+	.bottom-row {
+		position: relative;
+		top: 80px;
+		
+	}
+	
+	#ingredients-grid {
+		display: grid;
+		position: relative;
+		align-content: start;
+		gap: 10px 10px;
+		justify-content: start;	
+		grid-template-columns: auto auto auto;
+	}
+	
+	.ingredient {
+		position: relative;
+		top: 18px;
+	}
+	
+	#ingredient-amount{
+		width: 15%;
+	}
+	
+	#save-btn {
+		background-color: #572e16;
+    	color: white;
+		border-radius: 6px;
+		font-size: 18px;
+		height: 30px;
+		width: 175px;
+		font-weight: bold;
+	}
+
+
+	
+	
+	
+	
+</style>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Recipe</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+</head>
+
+<body>
+    <script>
+        /*<![CDATA[*/
+        let app = angular.module('myApp', []);
+        app.controller('controller', ($scope, $http, $q) => {
+        	var csrfToken = ''; // Initialize CSRF token variable
+        	var cookies = document.cookie.split(';');
+        	for (var i = 0; i < cookies.length; i++) {
+        	    var cookie = cookies[i].split('=');
+        	    if (cookie[0].trim() === 'XSRF-TOKEN') {
+        	        csrfToken = decodeURIComponent(cookie[1]);
+        	    }
+        	}
+        	$scope.logout = () => {
+        		$http({
+        			method: 'POST', 
+        			url: '/logout',
+        			headers: {
+        				'X-XSRF-TOKEN': csrfToken
+        			}
+        			
+        		}).then(function(response) {
+        			alert('successfully logged out');
+        			window.location.href = '/home';
+        			
+        		}).catch(function(error) {
+        			console.error('Logout failed: ', error);
+        			alert('Logout failed');
+        			});
+        		};
+        	
+            // Get the current list of recipes and ingredients
+            $http.get("/api/v1/recipes")
+                .then(res => $scope.recipes = res.data);
+            $http.get("/api/v1/ingredients")
+                .then(res => {
+                    $scope.ingredients = res.data;
+                    $scope.ingredients.forEach(i => i.amount = "");
+                });
+
+            // Watch the current recipe to update the ingredient amounts
+            // $scope.$watch syntax from:
+            //  https://stackoverflow.com/questions/23085976/how-to-execute-a-function-when-a-value-change
+            $scope.$watch("currentRecipe", (newVal, oldVal) => {
+                if ($scope.ingredients == undefined)
+                    return;
+
+                for (let ing of $scope.ingredients) {
+                    if (!newVal) {
+                        ing.amount = "";
+                        continue;
+                    }
+
+                    let recipeToIng = newVal.ingredients.find(rti => rti.ingredient.name == ing.name);
+                    if (recipeToIng)
+                        ing.amount = recipeToIng.count;
+                    else
+                        ing.amount = 0;
+                }
+            });
+
+            // Reset the form by pulling the original recipe data again
+            $scope.reset = () => {
+                $http.get("/api/v1/recipes")
+                    .then(res => $scope.recipes = res.data);
+            }
+
+            // Make the home button work
+            $scope.home = () => document.location.href = "/";
+            
+
+            // Submit a recipe by creating new recipe objects
+            $scope.submit = () => {
+                if ($scope.currentRecipe == undefined) {
+                    $scope.message = "Select a recipe to edit";
+                    return;
+                }
+
+                if ($scope.ingredients.some(i => i.amount == undefined ||
+                    i.amount == NaN ||
+                    i.amount < 0)) {
+                    $scope.message = "All amounts must be at least 0";
+                    return;
+                }
+                
+                if (!$scope.ingredients.some(i => i.amount > 0)) {
+                	$scope.message = "At least one ingredient is required";
+                	return;
+                }
+
+                if ($scope.currentRecipe.price == undefined ||
+                    $scope.currentRecipe.price == NaN ||
+                    $scope.currentRecipe.price < 0) {
+                    $scope.message = "Price must be at least 0";
+                    return;
+                }
+
+                data = {
+                    'name' : $scope.currentRecipe.name,
+                    'price' : $scope.currentRecipe.price,
+                    'ingredients' : $scope.ingredients.map(i => ({
+                        'ingredient' : i,
+                        'count' : i.amount
+                    }))
+                }
+
+                $http.patch(`/api/v1/recipes/${$scope.currentRecipe.name}`, data)
+                    .then(res => $scope.message = "Recipe edited",
+                        rej => $scope.message = rej.data.message)
+                    .then(() => $http.get("/api/v1/recipes"))
+                    .then(res => $scope.recipes = res.data);
+            }
+            
+            
+        });
+
+        /*]]>*/
+    </script>
+
+    <div id="background" ng-app="myApp" ng-controller="controller">
+		<button id="logout-btn" ng-click="logout()">Logout</button>
+
+		
+    	
+        <button id="home-btn" ng-click="home()">Go Home</button>
+    	<h1 class="title">Edit Recipe</h1>
+    	<div class = "flex-container">        
+        <select name="Recipe" id="recipe-selector" ng-model="currentRecipe"
+            ng-options="recipe as recipe.name for recipe in recipes">
+            <option value="">Select a recipe</option>
+        </select>
+        <div class="section" id="price">
+            <h2 style="display: inline;">Price</h2>
+            <input type="number" min="0" ng-model="currentRecipe.price">
+        </div>
+        <div class="ingredient-container">
+        	<div class="section" id="ingredients">
+
+            	<h2 id="ingredient-title">Ingredients</h2>
+
+            	<div id="ingredients-grid">
+                	<div class="ingredient" ng-repeat="ingredient in ingredients">
+                    	<div style="display: inline;">{{ingredient.name}}</div>
+                    	<input id="ingredient-amount" type="number" min="0" ng-model="ingredient.amount">
+                	</div>
+           	 	</div>
+        	</div>
+        </div>
+        alert({{message}})
+        <div class="bottom-row">
+
+                <button id="save-btn" ng-click="submit()">Save Recipe</button><br><br>
+                <button id="reset-btn" ng-click="reset()">Reset Form</button>
+            </div>
+        </div>
+    </div>
+ 
+</body>
+
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<!--- Header information about the page -->
+<body>
+	
+
+	<div layout:fragment="content">
+		
+
+
+		<script	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.js"></script>
+		<script>
+			/* Without these comments, Thymeleaf will try to parse the Javascript as XML and break itself sometimes */
+			/*<![CDATA[*/ 
+			var app = angular.module('myApp', []);
+			app.controller('populateCtrl', function($scope, $http, $q) {
+
+				$scope.timeIntervals = [
+					{value: 1, display: 'one'},
+					{value: 2, display: 'two'},
+					{value: 3, display: 'three'},
+					{value: 4, display: 'four'}
+				];
+
+				$scope.commitData = {
+					"Coffee":
+						[
+							{ "count": 0, "display": "Coffee 1", "timestamp": 1583038800000 },
+							{ "count": 0, "display": "Coffee 2", "timestamp": 1583211600000 }
+						],
+					"Tea":
+						[
+							{ "count": 0, "display": "Tea 1", "timestamp": 1583038800000 },
+							{ "count": 0, "display": "Tea 2", "timestamp": 1583211600000 },
+							{ "count": 0, "display": "Tea 3", "timestamp": 1583384400000 }
+						]
+				};
+
+				$scope.branches = ["one", "two", "three"];
+
+				console.log(15)
+					
+				/* Logic that handles controlling your page goes here */
+				$scope.users = [];
+				$scope.selectedUser = {};
+				$scope.myFunction = function () {
+					/* Creates a function inside of `$scope` called `onSubmit` that takes no parameters and 
+					maybe returns something (unlike in Java, function return types aren't declared -- the 
+					function can return whatever it wants, or nothing at all...) */
+
+					alert($scope.x);
+				};
+
+				$scope.math = function(a,b){return (5*a) - b;}
+				$scope.add = function(a,b){return (Number.parseInt(a)+Number.parseInt(b));}
+
+				// $http.get("/api/v1/recipes").then(function(response) {
+				// 		$scope.recipes = response.data;
+				// });
+			});
+
+
+			/* Without these comments, Thymeleaf will try to parse the Javascript as XML and break itself sometimes */
+			/*]]>*/
+		</script>
+
+		<div ng-app="myApp" ng-controller="populateCtrl">
+			<input type="text" ng-model="x" required="true" />
+			<input type="text" ng-model="y" required="true" />
+		
+
+			<button ng-click="myFunction()">Click Me</button>
+			<p>The result is {{add(x,y)}}</p>
+			<!--- Various HTML elements, with extra tags telling Angular how to work with them, go here -->
+
+			<div class="col-sm">
+				Select number: <br />
+				<select ng-model="interval"
+						ng-options="item as item.display for item in timeIntervals"
+						required="true">
+					<option value="">Select number for viewing data</option>
+				</select>
+			</div>
+
+			<div class="col-sm">
+				(Optional) Select the number to view <br />
+				<div ng-repeat="branch in branches track by $index">
+					<input type="checkbox"
+						ng-model="$parent.selectedBranches[branch]">
+					<tt> {{branch}}</tt> <!-- remove the extra spaces -->
+					</input>
+				</div>
+			</div>
+
+			<div ng-repeat="(user, commits) in commitData track by $index">
+				Beverage options for {{user}}:<br />
+				<div id="{{user}}">
+					<li ng-repeat="commit in commits">{{commit.display}}</li>
+				</div>
+			</div>
+
+		</div>
+		
+	</div>
+
+</body>
+</html>

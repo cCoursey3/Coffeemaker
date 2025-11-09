@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Delete Recipes</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<script
+	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+<style>
+    body {
+  		background-color: #f8d8af;
+	}
+	#flex-container{
+	 	display: flex;
+    	flex-direction: column;
+    	align-items: center;
+    	justify-content: center;
+    	text-align: center;
+    	min-height: 100vh; /* Make sure it takes at least full viewport height */
+    	font-size: 20px;
+	}
+	
+	h1 {
+ 		font-family: 'Source Code Pro', monospace;
+ 		font-size: 55px;
+        margin-top: 0;
+	}
+	ul {
+        list-style-type: none; /* No bullets */
+        padding: 0; /* Remove padding */
+        margin: 0; /* Remove margin */
+    }
+    button, input[type=submit] {
+    	position: relative;
+    	top: 30px;
+    	font-size: 16px;
+    }
+    #logout-btn {
+		position: relative;
+		left: 900px;
+		border: none;
+		background-color: #f8d8af;
+	}
+
+</style>
+
+
+<body>
+	<script> 
+    /*<![CDATA[*/
+		var app = angular.module('myApp', []);
+		app.controller('recipesCtrl', function($scope, $http) {
+        	var csrfToken = ''; // Initialize CSRF token variable
+        	var cookies = document.cookie.split(';');
+        	for (var i = 0; i < cookies.length; i++) {
+        	    var cookie = cookies[i].split('=');
+        	    if (cookie[0].trim() === 'XSRF-TOKEN') {
+        	        csrfToken = decodeURIComponent(cookie[1]);
+        	    }
+        	}
+        	$scope.logout = () => {
+        		$http({
+        			method: 'POST', 
+        			url: '/logout',
+        			headers: {
+        				'X-XSRF-TOKEN': csrfToken
+        			}
+        			
+        		}).then(function(response) {
+        			alert('successfully logged out');
+        			window.location.href = '/home';
+        			
+        		}).catch(function(error) {
+        			console.error('Logout failed: ', error);
+        			alert('Logout failed');
+        			});
+        		};
+			function updateRecipes() {
+				$http.get("/api/v1/recipes").then(function (response) {
+	  				$scope.recipes = response.data;
+	  			});
+			}
+			
+			function deleteRecipe(recipe) {
+		        $http.delete("/api/v1/recipes/" + recipe)
+		            .then(
+		            function (response) {
+		            		console.log(response);
+		    				$scope.submissionSuccess=true;	
+		    				
+		                
+		             	updateRecipes();
+		            },
+		            function(rejection){
+		                console.error('Error while deleting recipe');
+		                console.log(rejection);
+		                
+						$scope.submissionSuccess=false;	
+		                
+		             	// Update recipe list
+				        $http.get("/api/v1/recipes").then(function (response) {
+			  				$scope.recipes = response.data;
+			  			});
+		            }
+		        );
+			}
+			
+			$scope.del = function(){				
+				if ($scope.deleteAll) {
+					for (var i = 0, len = $scope.recipes.length; i < len; i++) {
+						var recipe = $scope.recipes[i];
+						deleteRecipe(recipe.name);
+					}
+				} else {
+					deleteRecipe($scope.name);
+				}
+				
+		        updateRecipes();
+			}
+			
+  			updateRecipes();
+		});
+	/*]]>*/
+	</script>
+
+	<div layout:fragment="content" class="generic-container ng-cloak" ng-app="myApp" ng-controller="recipesCtrl as ctrl">
+		<a href="/index"><button id="home">Home</button></a>
+		 <button id="logout-btn" ng-click="logout()">Logout</button>
+		<div id="flex-container">
+		<h1>Coffee Recipes</h1>
+
+		<div>
+			<ul>
+				<li ng-repeat="recipe in recipes"><label>{{recipe.name}}
+						<input type="radio" ng-model="$parent.name" name="name"
+						value="{{recipe.name}}" required="true" />
+				</label></li>
+			</ul>
+			<br />
+			
+			<div ng-if="0 >= recipes.length">There are no recipes in the
+				Coffee Maker.</div>
+			<div ng-if="submissionSuccess">Recipe deleted successfully</div>
+
+			<br><br>
+			<div ng-if="recipes.length > 0">
+				<input type="checkbox" name="all" class="checkbox"
+					ng-model="$parent.deleteAll"> Delete all recipes? </input> <br />
+				<input type="submit" value="Delete" ng-click="del()"
+					class="btn btn-warning btn-sm" />
+			</div>
+
+
+
+
+
+		</div>
+		
+	</div>
+	</div>
+
+
+
+</body>
+</html>

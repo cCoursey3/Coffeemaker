@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="myApp">
+<head>
+	
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.js"></script>
+    
+    <style>
+	
+    body {
+  	background-color: #f8d8af;
+	}
+	.loggedin{
+		font-size: 16px;
+		position: fixed;
+		top: 500px;
+		transform: translate(-50%, 0); /* Horizontally centers the element */
+		left: 50%;  /* Defines a starting point at 50% from the left */
+		font-weight: bold;
+		font-family: 'Source Code Pro', monospace;
+		color: #7b7b7d;
+	
+	}
+	
+
+	button{
+    	background-color: #572e16;
+    	color: white;
+		transform: translate(-50%, 0); /* Horizontally centers the element */
+		left: 50%;  /* Defines a starting point at 50% from the left */
+		border-radius: 8px;
+		font-size: 23px;
+		height: 40px;
+		width: 250px;
+		font-weight: bold;
+		position: relative;
+		top: 200px;
+
+
+
+    }
+
+		#logout-btn {
+		position: relative;
+		left: 900px;
+		border: none;
+		background-color: #f8d8af;
+	}
+	h1 {
+ 		text-align: center;
+ 		font-family: 'Source Code Pro', monospace;
+ 		font-size: 70px;
+        position: fixed;
+        top: 30px;
+        transform: translate(-50%, 0); /* Horizontally centers the element */
+		left: 50%;  /* Defines a starting point at 50% from the left */
+	}
+    </style>
+
+    <h1> CoffeeMaker </h1>
+    
+
+
+</head>
+
+<body>
+<button id="logout-btn" ng-click="logout()">Logout</button>
+
+	<form>
+	<div class="options">
+		<button>Add Staff Member</button><br><br>
+		<button>Add Ingredients</button><br><br>
+		<button>Add Recipe</button> <br><br>
+		<button>Edit Recipe</button><br><br>
+		<button>Fulfill Orders</button><br><br>
+	</div>
+	<div class="loggedin">
+		<br><br>Logged in as Manager
+	</div>
+
+
+	
+	   
+	</form>
+    <script>
+    	/*<![CDATA[*/
+    		        let app = angular.module('myApp', []);
+
+    	app.controller('controller', ($scope, $http, $q) => {
+        	var csrfToken = ''; // Initialize CSRF token variable
+        	var cookies = document.cookie.split(';');
+        	for (var i = 0; i < cookies.length; i++) {
+        	    var cookie = cookies[i].split('=');
+        	    if (cookie[0].trim() === 'XSRF-TOKEN') {
+        	        csrfToken = decodeURIComponent(cookie[1]);
+        	    }
+        	}
+        	$scope.logout = () => {
+        		$http({
+        			method: 'POST', 
+        			url: '/logout',
+        			headers: {
+        				'X-XSRF-TOKEN': csrfToken
+        			}
+        			
+        		}).then(function(response) {
+        			alert('successfully logged out');
+        			window.location.href = '/home';
+        			
+        		}).catch(function(error) {
+        			console.error('Logout failed: ', error);
+        			alert('Logout failed');
+        			});
+        		};
+    	})
+        /*]]>*/
+    </script>
+</body>
+</html>

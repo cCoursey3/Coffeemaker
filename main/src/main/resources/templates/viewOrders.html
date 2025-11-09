@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app">
+
+<head>
+
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.js"></script>
+
+	<style>
+		body {
+			background-color: #f8d8af;
+		}
+
+		.flex-container {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			text-align: center;
+			min-height: 100vh;
+			/* Make sure it takes at least full viewport height */
+		}
+
+		h1 {
+			font-family: 'Source Code Pro', monospace;
+			font-size: 55px;
+			margin-top: 0;
+
+		}
+
+		#logout-btn {
+			position: relative;
+			left: 900px;
+			border: none;
+			background-color: #f8d8af;
+		}
+
+		.items {
+			display: flex;
+			flex-direction: column;
+			border: 2px solid #6F4E37;
+			border-radius: 5px;
+			width: 35%;
+			height: 80px;
+			background-color: #fff5e7;
+			display: flex;
+			box-shadow: 3px 3px;
+			margin-bottom: 12pt;
+		}
+
+		.recipeOrdered {
+			font-size: 20px;
+			font-weight: bold;
+			text-align: start;
+			position: relative;
+			left: 20px;
+			top: 12px;
+			font-family: 'Source Code Pro', monospace;
+		}
+
+		.status {
+			font-family: 'Source Code Pro', monospace;
+			font-size: 16px;
+			position: relative;
+			top: 15px;
+			text-align: left;
+			left: 20px;
+		}
+
+		#submit {
+			background-color: #572e16;
+			color: white;
+			border-radius: 10px;
+			font-size: 18px;
+			height: 30px;
+			width: 100px;
+			font-weight: bold;
+			position: relative;
+			top: -15px;
+			left: 200px;
+
+		}
+	</style>
+</head>
+
+<body>
+	<script>
+		/*<![CDATA[*/
+		var app = angular.module('app', []);
+		app.controller('populateCtrl', function ($scope, $http, $q) {
+			var csrfToken = ''; // Initialize CSRF token variable
+			var cookies = document.cookie.split(';');
+			for (var i = 0; i < cookies.length; i++) {
+				var cookie = cookies[i].split('=');
+				if (cookie[0].trim() === 'XSRF-TOKEN') {
+					csrfToken = decodeURIComponent(cookie[1]);
+				}
+			}
+			$scope.logout = () => {
+				$http({
+					method: 'POST',
+					url: '/logout',
+					headers: {
+						'X-XSRF-TOKEN': csrfToken
+					}
+
+				}).then(function (response) {
+					alert('successfully logged out');
+					window.location.href = '/home';
+
+				}).catch(function (error) {
+					console.error('Logout failed: ', error);
+					alert('Logout failed');
+				});
+			};
+
+			function refresh() {
+				$http.get("/api/v1/users/self").then(function (response) {
+					$scope.user = response.data;
+				});
+			}
+
+			setInterval(refresh, 1000);
+
+			$scope.pickUpOrder = async (order) => {
+				await $http({
+					method: 'PUT',
+					url: `/api/v1/orders/${order.id}`,
+					data: { status: "Past Order" },
+					headers: {
+						'X-XSRF-TOKEN': csrfToken
+					}
+				})
+				refresh();
+				alert("Picked up order!");
+			};
+
+			refresh();
+		});
+
+		/*]]>*/
+	</script>
+	<div ng-controller="populateCtrl">
+		<a href="/index"><button id="home">Home</button></a>
+		 <button id="logout-btn" ng-click="logout()">Logout</button>
+		 <div class="flex-container" >
+		<h1>Your Orders</h1>
+		<div class="items" ng-repeat="order in user.userOrders | orderBy: '-id'">
+			<div class="recipeOrdered">{{order.recipe.name}}</div>
+			<div class="status"> {{order.status}}
+				<button id="submit" ng-show="order.status == 'Ready!'" ng-click="pickUpOrder(order)"> Pick Up</button>
+			</div>
+		</div>
+		</div>
+	</div>
+
+
+</body>
+
+</html>

@@ -1,0 +1,323 @@
+<!-- HTML5 document template given by VSCode -->
+<!DOCTYPE html>
+<html lang="en">
+
+<style>
+	
+	/* styles background of page*/
+	body {
+  		background-color: #f8d8af;
+	}
+	
+	/*styles the header*/
+	h1 {
+ 		font-family: 'Source Code Pro', monospace;
+ 		font-size: 55px;
+        margin-top: 2;
+        text-align: center;
+	}
+		#logout-btn {
+		position: relative;
+		left: 900px;
+		border: none;
+		background-color: #f8d8af;
+	}
+	/*provides a flex box for all content to be placed in */
+	.flex-container {
+		display: flex;
+		flex-direction: column;
+		min-height: 100vh;
+		width: 80%;
+		position: relative;
+		transform: translate(-50%, 0); /* Horizontally centers the element */
+		left: 50%;  /* Defines a starting point at 50% from the left */
+		top: -40px;
+	}
+	
+	/*title "ingredients" */
+	#ingredient-title {
+		display: inline-flex;  
+		position: relative;
+		background-color: #f8d8af;
+		z-index: 1; 
+    	box-sizing: border-box;
+    	font-size: 25px;
+		font-weight: bold;
+		padding: 10px;
+		font-family: 'Source Code Pro', monospace;
+		font-size: 35px;
+		justify-content: center;
+		text-align: center;
+    	top: -25px;
+    	transform: translate(-50%, 0); /* Horizontally centers the element */
+		left: 50%;  /* Defines a starting point at 50% from the left */
+    	
+	}	
+	
+	/* title "view inventory" */
+	#view {
+		font-size: 25px;
+		font-weight: bold;
+		position: relative;
+		padding: 20px;
+		font-family: 'Source Code Pro', monospace;
+		font-size: 35px;
+		left: -10px;
+	}
+	
+	/* items already in inventory*/
+	.inventory {		
+		display: flex;
+		flex-direction: row wrap;
+		position: relative;
+		left: 30px;
+		font-size: 24px;
+		padding: 5px;		
+	}
+	
+	/*ingredients in the inventory so a person can edit*/
+	.section {
+		display: flex;
+		border: 2px solid;
+		min-height: 50vh;
+		flex-direction: row;
+		overflow-y: scroll;
+		padding: 60px 30px;
+		
+	}
+	
+	#ingredients-grid {
+		display: grid;
+		position: relative;
+		align-content: start;
+		gap: 15px 10px;
+		justify-content: start;
+		grid-template-columns: auto auto auto;
+		
+	}
+	
+	#ingredients{
+		position: relative;
+		top: -60px;
+	}
+	
+	.ingredient{
+		border: 2px solid #6F4E37;
+		border-radius: 5px;
+		width: 55%;
+		height: 40px;
+		background-color: #D2B48C;
+		display: flex;
+		justify-content: start;
+		text-align: center;
+		align-items: center;
+		box-shadow: 3px 3px;
+	}
+	
+	
+	input[type=number] {
+		position: relative;
+		left: 5px;
+		width: 45%;
+	}
+	
+	.bottom-row {
+		position: relative;
+		justify-content: center;
+		text-align: center;
+		align-items: center;
+		top: -50px;
+	}
+	
+	
+	#save-btn {
+		background-color: #572e16;
+    	color: white;
+		border-radius: 6px;
+		font-size: 24px;
+		height: 40px;
+		width: 200px;
+		font-weight: bold;
+		position: relative;
+		
+	}
+	
+	
+	#home-btn {
+		position: fixed;
+		top: -90px;
+	}
+	
+	#message-container {
+       display: none;
+       border: solid;
+       position: fixed;
+       top: 50px;
+       width: 40%;
+       height: 20%;
+       background-color: white;
+       border-radius: 10px;
+	   font-size: 20px;
+	   font-weight: normal;
+	   align-content: center;
+	   text-align: center;
+	   transform: translate(-50%, 0); 
+	   left: 50%;  
+    }
+    
+    #message-container button {
+    	width: 100%;
+    	border-radius: 5px;
+    	background-color: white;
+    	color: black;
+    	font-weight: normal;
+    	position: absolute;
+    	bottom: 0;
+    	right: 0;
+    	font-family: 'Source Code Pro', monospace;
+    	font-size: 16px;
+    }
+    
+    .message {
+    	font-family: 'Source Code Pro', monospace;
+    	font-size: 32px;
+    	font-weight: bold;
+    	position: relative;
+    }
+
+</style>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Recipe</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+</head>
+
+<body>
+    <script>
+        /*<![CDATA[*/ 
+        let app = angular.module('myApp', []);
+
+    	app.controller('controller', ($scope, $http, $q) => {
+        	var csrfToken = ''; // Initialize CSRF token variable
+        	var cookies = document.cookie.split(';');
+        	for (var i = 0; i < cookies.length; i++) {
+        	    var cookie = cookies[i].split('=');
+        	    if (cookie[0].trim() === 'XSRF-TOKEN') {
+        	        csrfToken = decodeURIComponent(cookie[1]);
+        	    }
+        	}
+        	$scope.logout = () => {
+        		$http({
+        			method: 'POST', 
+        			url: '/logout',
+        			headers: {
+        				'X-XSRF-TOKEN': csrfToken
+        			}
+        			
+        		}).then(function(response) {
+        			alert('successfully logged out');
+        			window.location.href = '/home';
+        			
+        		}).catch(function(error) {
+        			console.error('Logout failed: ', error);
+        			alert('Logout failed');
+        			});
+        		};
+            // Get the current list of ingredients
+    		$http.get("/api/v1/ingredients")
+                .then(res => {
+                    $scope.ingredients = res.data;
+                    $scope.ingredients.forEach(i => {
+                        i.oldAmount = i.amount
+                        i.amount = 0
+                    });
+                });
+
+            // Initialize all ingredients to adding 0
+            $scope.reset = () => {
+                for (let ing of $scope.ingredients) {
+                    ing.amount = 0;
+                }
+            }
+
+            // Make the home button work
+            $scope.home = () => document.location.href = "/"
+            
+            $scope.reset2 = () => {
+    			document.getElementById("message-container").style.display = "none";
+    				
+    		}
+
+            // Add items to the inventory
+            $scope.submit = () => {
+                for (let ing of $scope.ingredients) {
+                    if (ing.amount == undefined || ing.amount == NaN || ing.amount < 0) {
+                        $scope.message = "All ingredient amounts must be at least 0";
+                        document.getElementById("message-container").style.display = "block";
+                        return;
+                    }
+                }
+
+                for (let ing of $scope.ingredients) {
+                    let success = true;
+                    $http.put(`/api/v1/ingredients/${ing.name}`, ing.amount + ing.oldAmount)
+                        .then(res => {
+                            $scope.message = "Ingredients added";
+                            document.getElementById("message-container").style.display = "block";
+                            ing.oldAmount += ing.amount;
+                            ing.amount = 0;
+                        }, 
+                        rej => {
+                            $scope.message = rej.data.message;
+                            success = false;
+                        });
+
+                    if (!success)
+                        break;
+                }
+            }
+    	});
+
+        /*]]>*/
+    </script>
+    <div ng-app="myApp" ng-controller="controller">
+    <button id="logout-btn" ng-click="logout()">Logout</button>
+        <h1>Add Inventory</h1>
+        <div class="flex-container">
+        	<div class = "container">
+        		<div id = "view" class = "label">View Inventory</div>
+        		<div class="inventory" ng-repeat="ingredient in ingredients">
+        			{{ ingredient.name }}: {{ ingredient.oldAmount }}<br />
+        		</div>
+        	</div>
+        	<br /><br>
+        	<div class = "container2">
+        		<div id="ingredient-title" class="label">Ingredients</div>
+        		<div class="section" id="ingredients">
+            		<div id="ingredients-grid">
+                		<div class="ingredient" ng-repeat="ingredient in ingredients">
+                    		<div>{{ingredient.name}}</div>
+                    		<input type="number" min="0" ng-model="ingredient.amount">
+                		</div>
+           	 		</div>   
+           	 	</div>        	 	
+        	</div>
+        	
+        	<div class="bottom-row">    
+            	<button id="save-btn" ng-click="submit()">Add Inventory</button><br><br>
+            	<button id="reset-btn" ng-click="reset()">Reset Form</button>
+            </div>
+            <button id="home-btn" ng-click="home()">Go Home</button>
+            
+        </div>
+        <div id = "message-container">
+	    		<div class = "message">{{message}}</div>
+	    		<button class="yes" ng-click="reset2()">okay</button>
+	  	</div>
+        
+    </div>
+</body>
+
+</html>
